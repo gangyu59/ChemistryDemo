@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chemistry Demo</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <canvas id="myCanvas" width="900" height="700" style="border:1px solid #000000;"></canvas>
+    <div class="button-container">
+        <button id="showLensImaging">Lens Imaging</button>
+        <button id="showMagneticField">Magnetic Field</button>
+        <button id="showStaticElectricity">Static Electricity</button>
+        <button id="showHeatConduction">Heat Conduction</button>
+        <button id="showConvection">Convection</button>
+        <button id="showColorChangeReaction">Color Change Reaction</button>
+        <button id="showVolcanicEruption">Volcanic Eruption</button>
+        <button id="showDryIceSublimation">Dry Ice Sublimation</button>
+        <button id="showLightPolarization">Light Polarization</button>
+        <button id="showBlackbodyRadiation">Blackbody Radiation</button>
+    </div>
+
+    <script src="static/js/lensImaging.js"></script>
+    <script src="static/js/magneticField.js"></script>
+    <script src="static/js/staticElectricity.js"></script>
+    <script src="static/js/heatConduction.js"></script>
+    <script src="static/js/convection.js"></script>
+    <script src="static/js/colorChangeReaction.js"></script>
+    <script src="static/js/volcanicEruption.js"></script>
+    <script src="static/js/dryIceSublimation.js"></script>
+    <script src="static/js/lightPolarization.js"></script>
+    <script src="static/js/blackbodyRadiation.js"></script>
+    <script src="static/js/main.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
