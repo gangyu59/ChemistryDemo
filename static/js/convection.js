@@ -13,14 +13,14 @@ function startConvection(canvas, ctx, clearCanvasAndStop) {
     clearCanvasAndStop(); // 停止其他动画并清理画布
 
     const particles = [];
-    const numParticles = 200;
+    const numParticles = 400;
 
     function createParticle(x, y) {
         return {
             x: x,
             y: y,
-            vy: Math.random() * 2 - 1, // 粒子初始随机向上或向下运动
-            alpha: 1
+            vy: Math.random() * 3 - 1.5, // 粒子初始随机向上或向下运动
+            alpha: 2
         };
     }
 
