@@ -1,0 +1,157 @@
+:root {
+    --bg-page: #0a0f1e;
+    --bg-surface: #131929;
+    --bg-hover: #1c2640;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.35);
+
+    --text-primary: #e2e8f0;
+    --text-muted: #6b7fa3;
+    --border: #1e3058;
+
+    --color-optics: #22d3ee;
+    --color-em: #f97316;
+    --color-thermo: #f43f5e;
+    --color-chem: #34d399;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
+    min-height: 100vh;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text-primary);
+    background: var(--bg-page);
+    background-image:
+        linear-gradient(rgba(59, 130, 246, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+header h1 {
+    font-size: clamp(20px, 4vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #60a5fa, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+header p {
+    margin-top: 6px;
+    font-size: clamp(12px, 2vw, 15px);
+    color: var(--text-muted);
+}
+
+#myCanvas {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    /* Canvas 绘制逻辑原本以“白底”对比为主（尤其 heatConduction 的黑字），
+       页面可以深色，但 canvas 背景保持白色避免可视性变差。 */
+    background: #ffffff;
+    box-shadow:
+        0 0 0 1px var(--border),
+        0 0 40px rgba(59, 130, 246, 0.10),
+        0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 900px;
+    max-width: 900px; /* 不缩放 canvas，避免 offset 逻辑错位 */
+    margin-top: 20px;
+}
+
+.section-label {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 10px 0 5px;
+    border-bottom: 1px solid var(--border);
+    margin-top: 10px;
+}
+
+button {
+    height: 50px;
+    width: 100%;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    user-select: none;
+}
+
+button:hover {
+    background: var(--bg-hover);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 0 14px var(--accent-glow), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.btn-optics {
+    border-left-color: var(--color-optics);
+}
+.btn-em {
+    border-left-color: var(--color-em);
+}
+.btn-thermo {
+    border-left-color: var(--color-thermo);
+}
+.btn-chem {
+    border-left-color: var(--color-chem);
+}
+
+.btn-optics:hover {
+    box-shadow: 0 0 14px rgba(34, 211, 238, 0.3), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.btn-em:hover {
+    box-shadow: 0 0 14px rgba(249, 115, 22, 0.3), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.btn-thermo:hover {
+    box-shadow: 0 0 14px rgba(244, 63, 94, 0.3), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.btn-chem:hover {
+    box-shadow: 0 0 14px rgba(52, 211, 153, 0.3), 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 920px) {
+    .button-grid {
+        width: 100%;
+        max-width: 900px;
+    }
+}
+
