@@ -191,24 +191,35 @@ function startLensImaging(canvas, ctx, clearCanvasAndStop) {
         animationFrameId = requestAnimationFrame(draw);
     }
 
+    // Scale touch/mouse coords from CSS pixels → canvas coordinate space
     function getPos(e) {
         const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
         const src = e.touches ? e.touches[0] : e;
-        return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+        return {
+            x: (src.clientX - rect.left) * scaleX,
+            y: (src.clientY - rect.top) * scaleY
+        };
     }
 
-    canvas.addEventListener('mousedown', e => {
-        const p = getPos(e);
-        if (p.x >= objectPosition - 50 && p.x <= objectPosition + 50 &&
-            p.y >= canvas.height / 2 - 100 && p.y <= canvas.height / 2) dragging = true;
-    });
-    canvas.addEventListener('mousemove', e => { if (dragging) { objectPosition = Math.max(30, Math.min(canvas.width / 2 - 20, getPos(e).x)); } });
+    function nearObject(p) {
+        return p.x >= objectPosition - 60 && p.x <= objectPosition + 60 &&
+               p.y >= canvas.height / 2 - 120 && p.y <= canvas.height / 2 + 10;
+    }
+
+    canvas.addEventListener('mousedown', e => { if (nearObject(getPos(e))) dragging = true; });
+    canvas.addEventListener('mousemove', e => { if (dragging) objectPosition = Math.max(30, Math.min(canvas.width / 2 - 20, getPos(e).x)); });
     canvas.addEventListener('mouseup', () => dragging = false);
     canvas.addEventListener('mouseleave', () => dragging = false);
-    canvas.addEventListener('touchstart', e => { const p = getPos(e); if (p.x >= objectPosition - 50 && p.x <= objectPosition + 50 && p.y >= canvas.height / 2 - 100 && p.y <= canvas.height / 2) dragging = true; });
-    canvas.addEventListener('touchmove', e => { if (dragging) { objectPosition = Math.max(30, Math.min(canvas.width / 2 - 20, getPos(e).x)); } });
+
+    canvas.addEventListener('touchstart', e => {
+        if (nearObject(getPos(e))) { dragging = true; e.preventDefault(); }
+    }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+        if (dragging) { e.preventDefault(); objectPosition = Math.max(30, Math.min(canvas.width / 2 - 20, getPos(e).x)); }
+    }, { passive: false });
     canvas.addEventListener('touchend', () => dragging = false);
-    document.body.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
     image.onload = () => { draw(); };
 }

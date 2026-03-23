@@ -237,7 +237,7 @@ function startHeatConduction(canvas, ctx, clearCanvasAndStop) {
     }
 
     canvas.addEventListener('click', switchMaterial);
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); switchMaterial(); }, { passive: false });
+    canvas.addEventListener('touchstart', () => switchMaterial(), { passive: true });
 
     animate();
 }

@@ -126,8 +126,13 @@ function startMagneticField(canvas, ctx, clearCanvasAndStop) {
 
     function getPos(e) {
         const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
         const src = e.touches ? e.touches[0] : e;
-        return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+        return {
+            x: (src.clientX - rect.left) * scaleX,
+            y: (src.clientY - rect.top) * scaleY
+        };
     }
 
     canvas.addEventListener('mousedown', e => {
@@ -137,8 +142,15 @@ function startMagneticField(canvas, ctx, clearCanvasAndStop) {
     });
     canvas.addEventListener('mousemove', e => { if (draggingPole) { const p = getPos(e); draggingPole.x = p.x; draggingPole.y = p.y; } });
     canvas.addEventListener('mouseup', () => draggingPole = null);
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); const p = getPos(e); if (Math.hypot(p.x - northPole.x, p.y - northPole.y) < 50) draggingPole = northPole; else if (Math.hypot(p.x - southPole.x, p.y - southPole.y) < 50) draggingPole = southPole; }, { passive: false });
-    canvas.addEventListener('touchmove', e => { e.preventDefault(); if (draggingPole) { const p = getPos(e); draggingPole.x = p.x; draggingPole.y = p.y; } }, { passive: false });
+    canvas.addEventListener('touchstart', e => {
+        const p = getPos(e);
+        if (Math.hypot(p.x - northPole.x, p.y - northPole.y) < 60) draggingPole = northPole;
+        else if (Math.hypot(p.x - southPole.x, p.y - southPole.y) < 60) draggingPole = southPole;
+        if (draggingPole) e.preventDefault();
+    }, { passive: false });
+    canvas.addEventListener('touchmove', e => {
+        if (draggingPole) { e.preventDefault(); const p = getPos(e); draggingPole.x = p.x; draggingPole.y = p.y; }
+    }, { passive: false });
     canvas.addEventListener('touchend', () => draggingPole = null);
 
     animate();

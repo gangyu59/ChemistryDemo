@@ -362,7 +362,7 @@ function startVolcanicEruption(canvas, ctx, clearCanvasAndStop) {
     }
 
     canvas.addEventListener('click', triggerEruption);
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); triggerEruption(); }, { passive: false });
+    canvas.addEventListener('touchstart', () => triggerEruption(), { passive: true });
 
     triggerEruption();
     animate();

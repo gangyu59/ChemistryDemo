@@ -282,33 +282,15 @@ function startBlackbodyRadiation(canvas, ctx, clearCanvasAndStop) {
         animationFrameId = requestAnimationFrame(animate);
     }
 
-    canvas.addEventListener('click', e => {
+    function getCanvasPos(e) {
         const rect = canvas.getBoundingClientRect();
-        const px = e.clientX - rect.left, py = e.clientY - rect.top;
-        const by = canvas.height - 55;
-        const bx = 40;
-        // Check temp buttons
-        temperatures.forEach((T, i) => {
-            const tx = bx + i * 70;
-            if (px >= tx && px <= tx + 62 && py >= by && py <= by + 30) {
-                tempIdx = i;
-                targetTemp = temperatures[i];
-                photons = [];
-            }
-        });
-        // Click on star
-        const cx = canvas.width / 2, cy2 = canvas.height * 0.36;
-        if (Math.hypot(px - cx, py - cy2) < 90) {
-            tempIdx = (tempIdx + 1) % temperatures.length;
-            targetTemp = temperatures[tempIdx];
-            photons = [];
-        }
-    });
-    canvas.addEventListener('touchstart', e => {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const t = e.touches[0];
-        const px = t.clientX - rect.left, py = t.clientY - rect.top;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const src = e.touches ? e.touches[0] : e;
+        return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+    }
+
+    function handleTap(px, py) {
         const by = canvas.height - 55, bx = 40;
         temperatures.forEach((T, i) => {
             const tx = bx + i * 70;
@@ -322,7 +304,10 @@ function startBlackbodyRadiation(canvas, ctx, clearCanvasAndStop) {
             targetTemp = temperatures[tempIdx];
             photons = [];
         }
-    }, { passive: false });
+    }
+
+    canvas.addEventListener('click', e => { const p = getCanvasPos(e); handleTap(p.x, p.y); });
+    canvas.addEventListener('touchstart', e => { const p = getCanvasPos(e); handleTap(p.x, p.y); }, { passive: true });
 
     animate();
 }
