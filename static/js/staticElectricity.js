@@ -290,16 +290,22 @@ function startStaticElectricity(canvas, ctx, clearCanvasAndStop) {
 
     function getPos(e) {
         const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
         const src = e.touches ? e.touches[0] : e;
-        return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+        return {
+            x: (src.clientX - rect.left) * scaleX,
+            y: (src.clientY - rect.top) * scaleY
+        };
     }
 
     canvas.addEventListener('mousedown', e => { const p = getPos(e); onDown(p.x, p.y); });
     canvas.addEventListener('mousemove', e => { const p = getPos(e); onMove(p.x, p.y); });
     canvas.addEventListener('mouseup', onUp);
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); const p = getPos(e); onDown(p.x, p.y); }, { passive: false });
-    canvas.addEventListener('touchmove', e => { e.preventDefault(); const p = getPos(e); onMove(p.x, p.y); }, { passive: false });
-    canvas.addEventListener('touchend', e => { e.preventDefault(); onUp(); }, { passive: false });
+    // Only preventDefault when actively dragging (allows page scroll otherwise)
+    canvas.addEventListener('touchstart', e => { const p = getPos(e); onDown(p.x, p.y); if (rod.dragging) e.preventDefault(); }, { passive: false });
+    canvas.addEventListener('touchmove', e => { if (rod.dragging) { e.preventDefault(); const p = getPos(e); onMove(p.x, p.y); } }, { passive: false });
+    canvas.addEventListener('touchend', () => onUp());
 
     function animate() {
         drawBackground();

@@ -336,12 +336,8 @@ function startDryIceSublimation(canvas, ctx, clearCanvasAndStop) {
         return { x: src.clientX - rect.left, y: src.clientY - rect.top };
     }
 
-    canvas.addEventListener('click', e => {
-        addWater();
-    });
-    canvas.addEventListener('touchstart', e => {
-        e.preventDefault(); addWater();
-    }, { passive: false });
+    canvas.addEventListener('click', () => addWater());
+    canvas.addEventListener('touchstart', e => { addWater(); }, { passive: true });
 
     animate();
 }

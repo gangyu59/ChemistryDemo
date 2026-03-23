@@ -12,7 +12,6 @@ function startColorChangeReaction(canvas, ctx, clearCanvasAndStop) {
     const margin = 10;
     let imgWidth, imgHeight;
 
-    document.body.style.overflow = 'hidden';
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -70,13 +69,12 @@ function startColorChangeReaction(canvas, ctx, clearCanvasAndStop) {
 
     function isTouchingHandArea(x, y) {
         const rect = canvas.getBoundingClientRect();
-        const canvasX = x - rect.left;
-        const canvasY = y - rect.top;
-        const handXStart = canvas.width * 0.5; // 右上区域更大，调整为右半部分
-        const handXEnd = canvas.width; // 右边界
-        const handYStart = 0; // 顶部
-        const handYEnd = canvas.height * 0.5; // 下边界为一半高度
-        return canvasX >= handXStart && canvasX <= handXEnd && canvasY >= handYStart && canvasY <= handYEnd;
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const canvasX = (x - rect.left) * scaleX;
+        const canvasY = (y - rect.top) * scaleY;
+        return canvasX >= canvas.width * 0.5 && canvasX <= canvas.width &&
+               canvasY >= 0 && canvasY <= canvas.height * 0.5;
     }
 
     beakerImage.onload = () => {
