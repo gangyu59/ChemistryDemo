@@ -4,160 +4,144 @@ function startMagneticField(canvas, ctx, clearCanvasAndStop) {
     let northPole = { x: canvas.width / 4, y: canvas.height / 2 };
     let southPole = { x: 3 * canvas.width / 4, y: canvas.height / 2 };
     let draggingPole = null;
+    let time = 0;
 
-    const ironFilings = [];
-    const numFilings = 10000; // 增加铁屑的数量
+    const numLines = 24;
+    const stepsPerLine = 300;
+    const stepSize = 4;
 
-    // 初始化铁屑点
-    for (let i = 0; i < numFilings; i++) {
-        ironFilings.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            angle: 0 // 添加角度属性
-        });
-    }
-
-    function calculateForce(x, y, pole, isAttract) {
-        const dx = x - pole.x;
-        const dy = y - pole.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const forceMagnitude = isAttract ? 1000 / (distance * distance) : -1000 / (distance * distance);
-        return {
-            fx: forceMagnitude * (dx / distance),
-            fy: forceMagnitude * (dy / distance)
-        };
-    }
-
-    function updateIronFilings() {
-        for (let i = 0; i < ironFilings.length; i++) {
-            let { x, y } = ironFilings[i];
-
-            let forceN = calculateForce(x, y, northPole, false); // N极排斥
-            let forceS = calculateForce(x, y, southPole, true);  // S极吸引
-
-            let fx = forceN.fx + forceS.fx;
-            let fy = forceN.fy + forceS.fy;
-
-            ironFilings[i].x += fx;
-            ironFilings[i].y += fy;
-
-            // 计算铁屑的角度
-            ironFilings[i].angle = Math.atan2(fy, fx);
-
-            if (ironFilings[i].x < 0) ironFilings[i].x = 0;
-            if (ironFilings[i].x > canvas.width) ironFilings[i].x = canvas.width;
-            if (ironFilings[i].y < 0) ironFilings[i].y = 0;
-            if (ironFilings[i].y > canvas.height) ironFilings[i].y = canvas.height;
-        }
+    function getField(x, y) {
+        const dx1 = x - northPole.x, dy1 = y - northPole.y;
+        const r1 = Math.sqrt(dx1 * dx1 + dy1 * dy1) + 1;
+        const dx2 = x - southPole.x, dy2 = y - southPole.y;
+        const r2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) + 1;
+        const fx = (dx1 / (r1 * r1 * r1)) - (dx2 / (r2 * r2 * r2));
+        const fy = (dy1 / (r1 * r1 * r1)) - (dy2 / (r2 * r2 * r2));
+        const mag = Math.sqrt(fx * fx + fy * fy) + 1e-10;
+        return { fx: fx / mag, fy: fy / mag };
     }
 
     function drawFieldLines() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < numLines; i++) {
+            const angle = (i / numLines) * Math.PI * 2;
+            let x = northPole.x + Math.cos(angle) * 18;
+            let y = northPole.y + Math.sin(angle) * 18;
 
-        // Draw iron filings
-        for (let i = 0; i < ironFilings.length; i++) {
-            ctx.fillStyle = 'black';
-            ctx.save();
-            ctx.translate(ironFilings[i].x, ironFilings[i].y);
-            ctx.rotate(ironFilings[i].angle);
-            ctx.beginPath();
-            ctx.moveTo(-2, -5);
-            ctx.lineTo(2, -5);
-            ctx.lineTo(2, 5);
-            ctx.lineTo(-2, 5);
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
+            const points = [{ x, y }];
+            for (let s = 0; s < stepsPerLine; s++) {
+                const { fx, fy } = getField(x, y);
+                x += fx * stepSize;
+                y += fy * stepSize;
+                points.push({ x, y });
+                if (Math.hypot(x - southPole.x, y - southPole.y) < 20) break;
+                if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) break;
+            }
+
+            if (points.length < 2) continue;
+
+            for (let p = 1; p < points.length; p++) {
+                const t = p / points.length;
+                const hue = (160 + i * 14 + time * 40) % 360;
+                const alpha = 0.5 + 0.5 * Math.sin(t * Math.PI);
+                ctx.strokeStyle = `hsla(${hue}, 100%, 65%, ${alpha})`;
+                ctx.lineWidth = 1.5 + Math.sin(t * Math.PI) * 1.5;
+                ctx.beginPath();
+                ctx.moveTo(points[p - 1].x, points[p - 1].y);
+                ctx.lineTo(points[p].x, points[p].y);
+                ctx.stroke();
+            }
+
+            // Animated glowing dot flowing along the line
+            if (points.length > 10) {
+                const tArrow = ((time * 0.5 + i / numLines) % 1);
+                const idx = Math.floor(tArrow * (points.length - 1));
+                const pt = points[idx];
+                const hue = (60 + i * 15) % 360;
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = `hsl(${hue}, 100%, 85%)`;
+                ctx.shadowColor = `hsl(${hue}, 100%, 70%)`;
+                ctx.shadowBlur = 12;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
         }
-
-        // Draw poles as rounded rectangles
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.moveTo(northPole.x - 50, northPole.y - 30);
-        ctx.lineTo(northPole.x + 50, northPole.y - 30);
-        ctx.quadraticCurveTo(northPole.x + 70, northPole.y, northPole.x + 50, northPole.y + 30);
-        ctx.lineTo(northPole.x - 50, northPole.y + 30);
-        ctx.quadraticCurveTo(northPole.x - 70, northPole.y, northPole.x - 50, northPole.y - 30);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = 'white';
-        ctx.font = '30px Arial';
-        ctx.fillText('N', northPole.x - 10, northPole.y + 10);
-
-        ctx.fillStyle = 'blue';
-        ctx.beginPath();
-        ctx.moveTo(southPole.x - 50, southPole.y - 30);
-        ctx.lineTo(southPole.x + 50, southPole.y - 30);
-        ctx.quadraticCurveTo(southPole.x + 70, southPole.y, southPole.x + 50, southPole.y + 30);
-        ctx.lineTo(southPole.x - 50, southPole.y + 30);
-        ctx.quadraticCurveTo(southPole.x - 70, southPole.y, southPole.x - 50, southPole.y - 30);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = 'white';
-        ctx.font = '30px Arial';
-        ctx.fillText('S', southPole.x - 10, southPole.y + 10);
-
-        updateIronFilings();
-        requestAnimationFrame(drawFieldLines);
     }
 
-    function getMousePos(evt) {
+    function drawPole(pole, isNorth) {
+        const hue = isNorth ? 0 : 220;
+        const label = isNorth ? 'N' : 'S';
+
+        // Pulsing outer glow
+        const pulse = 0.3 + 0.15 * Math.sin(time * 3 + (isNorth ? 0 : Math.PI));
+        const grad = ctx.createRadialGradient(pole.x, pole.y, 5, pole.x, pole.y, 75);
+        grad.addColorStop(0, `hsla(${hue}, 100%, 70%, ${pulse})`);
+        grad.addColorStop(1, `hsla(${hue}, 100%, 50%, 0)`);
+        ctx.beginPath();
+        ctx.arc(pole.x, pole.y, 75, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Pole body
+        const bodyGrad = ctx.createRadialGradient(pole.x - 12, pole.y - 12, 4, pole.x, pole.y, 44);
+        bodyGrad.addColorStop(0, `hsl(${hue}, 100%, 85%)`);
+        bodyGrad.addColorStop(1, `hsl(${hue}, 100%, 38%)`);
+        ctx.beginPath();
+        ctx.arc(pole.x, pole.y, 44, 0, Math.PI * 2);
+        ctx.fillStyle = bodyGrad;
+        ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
+        ctx.shadowBlur = 25;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 32px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, pole.x, pole.y);
+    }
+
+    function animate() {
+        // Dark space background with subtle gradient
+        const bgGrad = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width * 0.8);
+        bgGrad.addColorStop(0, '#0a0a2e');
+        bgGrad.addColorStop(1, '#000010');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        drawFieldLines();
+        drawPole(northPole, true);
+        drawPole(southPole, false);
+
+        // Label
+        ctx.fillStyle = 'rgba(180,220,255,0.7)';
+        ctx.font = '18px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Drag the poles \u2014 watch the field lines reshape', canvas.width / 2, 14);
+
+        time += 0.016;
+        animationFrameId = requestAnimationFrame(animate);
+    }
+
+    function getPos(e) {
         const rect = canvas.getBoundingClientRect();
-        return {
-            x: evt.clientX - rect.left,
-            y: evt.clientY - rect.top,
-        };
+        const src = e.touches ? e.touches[0] : e;
+        return { x: src.clientX - rect.left, y: src.clientY - rect.top };
     }
 
-    canvas.addEventListener('mousedown', (e) => {
-        const pos = getMousePos(e);
-        if (Math.hypot(pos.x - northPole.x, pos.y - northPole.y) < 50) {
-            draggingPole = northPole;
-        } else if (Math.hypot(pos.x - southPole.x, pos.y - southPole.y) < 50) {
-            draggingPole = southPole;
-        }
+    canvas.addEventListener('mousedown', e => {
+        const p = getPos(e);
+        if (Math.hypot(p.x - northPole.x, p.y - northPole.y) < 50) draggingPole = northPole;
+        else if (Math.hypot(p.x - southPole.x, p.y - southPole.y) < 50) draggingPole = southPole;
     });
+    canvas.addEventListener('mousemove', e => { if (draggingPole) { const p = getPos(e); draggingPole.x = p.x; draggingPole.y = p.y; } });
+    canvas.addEventListener('mouseup', () => draggingPole = null);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); const p = getPos(e); if (Math.hypot(p.x - northPole.x, p.y - northPole.y) < 50) draggingPole = northPole; else if (Math.hypot(p.x - southPole.x, p.y - southPole.y) < 50) draggingPole = southPole; }, { passive: false });
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); if (draggingPole) { const p = getPos(e); draggingPole.x = p.x; draggingPole.y = p.y; } }, { passive: false });
+    canvas.addEventListener('touchend', () => draggingPole = null);
 
-    canvas.addEventListener('mousemove', (e) => {
-        if (draggingPole) {
-            const pos = getMousePos(e);
-            draggingPole.x = pos.x;
-            draggingPole.y = pos.y;
-        }
-    });
-
-    canvas.addEventListener('mouseup', () => {
-        draggingPole = null;
-    });
-
-    canvas.addEventListener('touchstart', (e) => {
-        const touch = e.touches[0];
-        const pos = getMousePos(touch);
-        if (Math.hypot(pos.x - northPole.x, pos.y - northPole.y) < 50) {
-            draggingPole = northPole;
-        } else if (Math.hypot(pos.x - southPole.x, pos.y - southPole.y) < 50) {
-            draggingPole = southPole;
-        }
-    });
-
-    canvas.addEventListener('touchmove', (e) => {
-        if (draggingPole) {
-            const touch = e.touches[0];
-            const pos = getMousePos(touch);
-            draggingPole.x = pos.x;
-            draggingPole.y = pos.y;
-        }
-    });
-
-    canvas.addEventListener('touchend', () => {
-        draggingPole = null;
-    });
-
-    document.body.addEventListener('touchmove', function(event) {
-        event.preventDefault();
-    }, { passive: false });
-
-    drawFieldLines();
+    animate();
 }
 
 window.startMagneticField = startMagneticField;
