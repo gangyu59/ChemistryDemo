@@ -2,24 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chemistry & Physics Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>化学演示 Chemistry Demo</title>
     <link rel="stylesheet" type="text/css" href="css/style.css">
     <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
-    <canvas id="myCanvas" width="900" height="700" style="border:1px solid #000000;"></canvas>
-    <div class="button-container">
-        <button id="showLensImaging">Lens Imaging</button>
-        <button id="showMagneticField">Magnetic Field</button>
-        <button id="showStaticElectricity">Static Electricity</button>
-        <button id="showHeatConduction">Heat Conduction</button>
-        <button id="showConvection">Convection</button>
-        <button id="showColorChangeReaction">Chemical Reaction</button>
-        <button id="showVolcanicEruption">Volcanic Eruption</button>
-        <button id="showDryIceSublimation">Dry Ice Sublimation</button>
-        <button id="showLightPolarization">Light Polarization</button>
-        <button id="showBlackbodyRadiation">Blackbody Radiation</button>
+    <header>
+        <h1>化学演示 Chemistry Demo</h1>
+        <p>点击按钮探索各种物理化学现象 · Click a button to explore phenomena</p>
+    </header>
+
+    <canvas id="myCanvas" width="900" height="700"></canvas>
+
+    <div class="button-grid">
+        <div class="section-label">光学 Optics</div>
+        <button class="btn-optics" id="showLensImaging">🔭 Lens Imaging</button>
+        <button class="btn-wave"   id="showLightPolarization">🌀 Light Polarization</button>
+
+        <div class="section-label">电磁 Electromagnetism</div>
+        <button class="btn-electro" id="showMagneticField">🧲 Magnetic Field</button>
+        <button class="btn-electro" id="showStaticElectricity">⚡ Static Electricity</button>
+
+        <div class="section-label">热学 Thermodynamics</div>
+        <button class="btn-thermo" id="showHeatConduction">🌡️ Heat Conduction</button>
+        <button class="btn-thermo" id="showConvection">🌊 Convection</button>
+        <button class="btn-thermo" id="showBlackbodyRadiation">🌟 Blackbody Radiation</button>
+
+        <div class="section-label">化学 Chemistry</div>
+        <button class="btn-chem" id="showColorChangeReaction">🧪 Chemical Reaction</button>
+        <button class="btn-chem" id="showDryIceSublimation">🧊 Dry Ice Sublimation</button>
+
+        <div class="section-label">地学 Earth Science</div>
+        <button class="btn-geo" id="showVolcanicEruption">🌋 Volcanic Eruption</button>
     </div>
 
     <script src="static/js/lensImaging.js"></script>
